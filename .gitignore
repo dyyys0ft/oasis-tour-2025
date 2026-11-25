@@ -2,6 +2,7 @@
 # into songs/ (see songs/README.md) and assets/theme.mp3 for the menu loop.
 songs/*.mp3
 assets/*.mp3
+stems/
 *.wav
 *.flac
 *.m4a

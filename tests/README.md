@@ -1,4 +1,4 @@
-# Tests
+﻿# Tests
 
 ```
 node --test tests/chart.test.js     # chart rules (no install needed)
@@ -20,7 +20,7 @@ Both run on every push via `.github/workflows/tests.yml`.
 | end trim | notes past `duration - 1.5` are dropped |
 | fallback | no peaks -> `null` -> template chart |
 | determinism | the same city always yields the same template |
-| **real Cardiff chart** | exactly 204 / 386 / 548 notes per difficulty |
+| **real Cardiff chart** | exactly 136 / 333 / 713 notes per difficulty |
 | **real chart shape** | sorted, unique, in range, medium spacing >= 0.22 s |
 
 `test_analyse.py` builds a click track at 120 BPM (12 clicks, one every
@@ -33,7 +33,7 @@ Both run on every push via `.github/workflows/tests.yml`.
 
 ## Why the counts are hard-coded
 
-204 / 386 / 548 is the current contract for Cardiff's chart. If a threshold in
+136 / 333 / 713 is the current contract for Cardiff's chart. If a threshold in
 `site/chart.js` or `tools/analyze_song.py` changes, that test fails on purpose
 so the change is deliberate rather than accidental.
 
@@ -41,3 +41,4 @@ so the change is deliberate rather than accidental.
 
 There is no browser test. The lane HUD, hit windows and scoring are verified by
 hand; adding Playwright would close that gap.
+

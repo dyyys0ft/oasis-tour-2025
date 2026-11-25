@@ -44,13 +44,22 @@ runs on every MP3 in `songs/`:
 4. pick local maxima above a floor, merge anything closer than 90 ms
 5. record **time**, **strength** and **spectral centroid** per hit
 
-Cardiff yields **836 peaks** over 200.9 s. Those become notes at load time:
+Cardiff's **guitar stem** (Demucs `htdemucs_6s`, `--two-stems=guitar`) yields
+**1006 peaks** over 201.0 s. Those become notes at load time:
 
 | Difficulty | Strength floor | Min gap | Kept | Lanes |
 |---|---|---|---|---|
-| Easy | 0.45 | 0.40 s | 204 | 3 |
-| Medium | 0.28 | 0.22 s | 386 | 4 |
-| Hard | 0.14 | 0.11 s | 548 | 4 |
+| Easy | 0.45 | 0.40 s | 136 | 3 |
+| Medium | 0.28 | 0.22 s | 333 | 4 |
+| Hard | 0.14 | 0.11 s | 713 | 4 |
+
+Analysing the stem instead of the mix narrows the brightness spread
+(centroid sd 0.156 vs 0.212) and lifts the average brightness (0.533 vs
+0.372) — cymbals and bass are gone, so lanes now track the guitar rather than
+the whole band. 57% of guitar peaks coincide with a mix peak within 50 ms;
+the rest were masked in the full mix.
+
+Run `python tools/analyze_song.py` for the mix, or `--guitar` for the stem.
 
 **Strength decides whether a hit is played; centroid decides the lane.** Dark,
 low hits (kick, bass) land on the left of the board, bright ones (snare,

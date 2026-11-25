@@ -189,13 +189,13 @@ def main():
     # Cache-bust the hand-edited assets: a content hash means a stale
     # stylesheet or app.js can never linger after a rebuild.
     import hashlib
-    stamp = hashlib.md5(
-        (open(os.path.join(SITE, "style.css"), "rb").read()
-         + open(os.path.join(SITE, "app.js"), "rb").read())
-    ).hexdigest()[:8]
+    sources = [open(os.path.join(SITE, name), "rb").read()
+               for name in ("style.css", "app.js", "chart.js", "charts.js")
+               if os.path.exists(os.path.join(SITE, name))]
+    stamp = hashlib.md5(b"".join(sources)).hexdigest()[:8]
 
     # The logo and name plates are small enough to keep inline in the page.
-    charts_tag = ('<script src="site/charts.js"></script>'
+    charts_tag = ('<script src="site/charts.js?v=__STAMP__"></script>'
                   if os.path.exists(os.path.join(SITE, "charts.js")) else '')
     html = (PAGE
             .replace("__LOGO__", b64(os.path.join(ART, "title.png")))
@@ -214,4 +214,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 

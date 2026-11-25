@@ -40,3 +40,16 @@ Keep these for bonus stops or the 2027 tour.
 `tools/make_audio.py` turns a source file into the 6-bit/22 kHz mix used by the
 menu. You do **not** need to run it on these — the guitar engine will read the
 MP3 at its native rate.
+
+## Guitar-only charts
+
+By default the analyser hears the whole mix. To chart only the guitar, separate
+it first with Demucs (CPU build of torch is enough):
+
+```
+python -m demucs.separate --two-stems=guitar -n htdemucs_6s -o stems songs/cardiff.mp3
+python tools/analyze_song.py --guitar
+```
+
+Stems land in `stems/htdemucs_6s/<city>/guitar.wav` and are gitignored. The
+chart JSON records `"source": "guitar"` so you can tell which pass produced it.

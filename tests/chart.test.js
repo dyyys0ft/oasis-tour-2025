@@ -88,7 +88,8 @@ test('real Cardiff chart matches the recorded analysis', () => {
   }
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
-  const expected = { easy: 204, medium: 386, hard: 548 };
+  // counts depend on which stem was analysed; these are the guitar-stem pass
+  const expected = { easy: 136, medium: 333, hard: 713 };
   for (const [difficulty, count] of Object.entries(expected)) {
     const notes = Chart.chartFromPeaks(data.peaks, data.duration, difficulty);
     assert.equal(notes.length, count, `${difficulty} note count drifted`);

@@ -55,8 +55,15 @@ python tools/build_sprites.py    # sprite sheets + atlases   -> art/
 python tools/make_title.py       # logo + name plates        -> art/
 python tools/make_audio.py       # 6-bit 22 kHz mix          -> assets/theme.mp3
 python tools/analyze_song.py     # MP3 -> note charts        -> site/charts.js
+python tools/analyze_song.py --guitar   # same, from the Demucs guitar stem
 python tools/make_site.py        # index.html + assets.js
 python tools/make_viewer.py      # dev sprite viewer         -> sprites.html
+```
+
+Guitar isolation (optional, slow):
+
+```
+python -m demucs.separate --two-stems=guitar -n htdemucs_6s -o stems songs/cardiff.mp3
 ```
 
 ## Tests

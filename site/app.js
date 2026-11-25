@@ -801,8 +801,7 @@ function drawBrick(b, x, y) {
 }
 
 function drawMaze(b) {
-  // floor only; the walls live on their own layer so they can be drawn over
-  // the character, which reads as depth
+  // floor
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
       if (maze[r][c]) continue;
@@ -814,23 +813,13 @@ function drawMaze(b) {
       b.fillRect(x, y, 1, TILE);
     }
   }
-}
 
-let wallsLayer = null;
-
-function ensureWalls() {
-  if (wallsLayer) return wallsLayer;
-  wallsLayer = document.createElement('canvas');
-  wallsLayer.width = W;
-  wallsLayer.height = H;
-  const b = wallsLayer.getContext('2d');
-  b.imageSmoothingEnabled = false;
+  // walls
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
       if (maze[r][c]) drawBrick(b, MAZE_X + c * TILE, MAZE_Y + r * TILE);
     }
   }
-  return wallsLayer;
 }
 
 /* ------------------------------------------------------------------- menu */
@@ -958,24 +947,20 @@ function renderMap() {
   ctx.drawImage(bg('map'), 0, 0);
   drawFollowLights();
 
-  // stop pads sit on the floor, under the walls
+  // stop pads sit on the floor, directly under the room centre
   TOUR.forEach((stop, i) => {
     const locked = !isUnlocked(i);
     const near = i === atNode;
-    const done = played.has(i);
+    const tint = TINT[stop.country] || '#ffffff';
 
-    const padW = 38, padH = 10;
-    ctx.fillStyle = locked ? '#3c3c3c' : (near ? '#ffffff' : (done ? '#9a9a9a' : '#cfcfcf'));
-    ctx.fillRect(Math.round(stop.x - padW / 2), Math.round(stop.y + 10), padW, padH);
-    if (near) {
-      const pulse = 0.5 + 0.5 * Math.sin(t * 6);
-      ctx.strokeStyle = `rgba(255,255,255,${0.3 + pulse * 0.5})`;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(stop.x - padW / 2 - 4, stop.y + 6, padW + 8, padH + 8);
-    }
+    ctx.fillStyle = locked ? '#161616' : (near ? '#ffffff' : '#0d0d0d');
+    ctx.fillRect(Math.round(stop.x - 17), Math.round(stop.y + 5), 34, 8);
+    ctx.strokeStyle = locked ? '#3a3a3a' : (near ? '#ffffff' : tint);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(stop.x - 17.5, stop.y + 4.5, 35, 9);
   });
 
-  // character, then the bricks over him, then the signs on top of both
+  // character
   const S = 1;
   const pulse = 0.5 + 0.5 * Math.sin(t * 4);
   shadow(actx, pos.x, pos.y + 2, 16, 4);
@@ -987,29 +972,33 @@ function renderMap() {
   drawCell(actx, IMG.walk, walkFrame() * SPRITE, player * SPRITE,
            Math.round(pos.x) - SPRITE * S / 2, Math.round(pos.y) - FEET * S, S);
 
-  actx.drawImage(ensureWalls(), 0, 0);
-
+  // signs: flag above the name, the whole block kept inside the 64 px room
   TOUR.forEach((stop, i) => {
     const locked = !isUnlocked(i);
     const near = i === atNode;
     const label = stop.city;
+    const tint = TINT[stop.country] || '#ffffff';
 
-    actx.font = '7px ui-monospace, Consolas, monospace';
-    const tw = actx.measureText(label).width;
-    const rowW = 18 + 4 + tw;
-    const lx = Math.round(stop.x - rowW / 2);
-    const ly = Math.round(stop.y + 24);
-
-    actx.fillStyle = 'rgba(0,0,0,.78)';
-    actx.fillRect(lx - 3, ly - 1, rowW + 6, 13);
-
+    const fx = Math.round(stop.x - 8);
     actx.imageSmoothingEnabled = false;
-    actx.globalAlpha = locked ? 0.45 : 1;
-    actx.drawImage(flagCanvas(stop.country), lx, ly + 1, 18, 11);
+    actx.globalAlpha = locked ? 0.4 : 1;
+    actx.drawImage(flagCanvas(stop.country), fx, stop.y + 14, 16, 10);
     actx.globalAlpha = 1;
 
-    actx.fillStyle = locked ? '#6a6a6a' : (near ? '#ffffff' : '#b4b4b4');
-    actx.fillText(label, lx + 22, ly + 9);
+    let size = 6;
+    actx.font = `${size}px ui-monospace, Consolas, monospace`;
+    let tw = actx.measureText(label).width;
+    if (tw > 60) {
+      size = 5;
+      actx.font = `${size}px ui-monospace, Consolas, monospace`;
+      tw = actx.measureText(label).width;
+    }
+    const tx = Math.round(stop.x - tw / 2);
+
+    actx.fillStyle = 'rgba(0,0,0,.85)';
+    actx.fillText(label, tx + 1, stop.y + 31);
+    actx.fillStyle = locked ? '#5f5f5f' : (near ? '#ffffff' : tint);
+    actx.fillText(label, tx, stop.y + 30);
   });
 }
 
@@ -1090,7 +1079,7 @@ function ghClock() {
 }
 
 function metronome(t) {
-  const meta = SONG_META[GH.stop.song] || { bpm: 100, offset: 0 };
+  const meta = CE.SONG_META[GH.stop.song] || { bpm: 100, offset: 0 };
   const beat = 60 / meta.bpm;
   const n = Math.floor((t - (meta.offset || 0)) / beat);
   if (n === GH.lastBeat) return;
