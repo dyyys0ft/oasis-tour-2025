@@ -35,39 +35,34 @@ Every venue is themed from `stop.country`:
 
 ## Stage 2 — the guitar engine ✅
 
-**The chart is detected from the recording**, not templated. `tools/analyze_song.py`
-runs on every MP3 in `songs/`:
+**The chart comes from the tab, not from the audio.** `site/chords.js` holds the
+song as data: BPM, how long each chord is held, a chord-to-lane map, and the
+sections written line by line from the transcription.
 
-1. decode to mono 22.05 kHz
-2. spectral-flux onset envelope (1024 window, 512 hop)
-3. subtract a ~1 s rolling mean, clamp at zero, normalise
-4. pick local maxima above a floor, merge anything closer than 90 ms
-5. record **time**, **strength** and **spectral centroid** per hit
+```js
+['F#5','E5','F#5','A','B'],   // I need to be myself
+['F#m','E5','F#5','A','B'],   // I can't be no one else
+```
 
-Cardiff's **guitar stem** (Demucs `htdemucs_6s`, `--two-stems=guitar`) yields
-**1006 peaks** over 201.0 s. Those become notes at load time:
+`chordChart()` walks those lines, turns each chord into 1 / 2 / 4 evenly spaced
+strums (easy / medium / hard) and picks the lane from the chord map. Supersonic
+gives **120 / 240 / 480** notes and runs 151 s; the solo is inserted as a silent
+16-beat gap.
 
-| Difficulty | Strength floor | Min gap | Kept | Lanes |
-|---|---|---|---|---|
-| Easy | 0.45 | 0.40 s | 136 | 3 |
-| Medium | 0.28 | 0.22 s | 333 | 4 |
-| Hard | 0.14 | 0.11 s | 713 | 4 |
+**Music offset.** The tab starts at the first verse, the record starts with an
+intro. `MUSIC START` is a 0-100 s slider on the venue card: it seeks the MP3 to
+that timecode and the chart starts at zero, so the two line up without a silent
+wait. The clock is `audio.currentTime - offset`.
 
-Analysing the stem instead of the mix narrows the brightness spread
-(centroid sd 0.156 vs 0.212) and lifts the average brightness (0.533 vs
-0.372) — cymbals and bass are gone, so lanes now track the guitar rather than
-the whole band. 57% of guitar peaks coincide with a mix peak within 50 ms;
-the rest were masked in the full mix.
+**Fallbacks.** A song with no authored chords still gets a chart: separated
+guitar-stem onsets if `songs/<city>.json` exists, else the beat-grid template.
+The analyser (`tools/analyze_song.py`, optionally `--guitar` after Demucs) is
+kept for those cases — it is no longer what Supersonic uses.
 
-Run `python tools/analyze_song.py` for the mix, or `--guitar` for the stem.
-
-**Strength decides whether a hit is played; centroid decides the lane.** Dark,
-low hits (kick, bass) land on the left of the board, bright ones (snare,
-cymbals) on the right — so a fill scatters across the keys instead of repeating
-one column.
-
-A city with no analysed chart falls back to the rhythmic template in
-`PATTERNS` / `ARRANGEMENT`, so un-analysed stops are still playable.
+**Analyser, for reference.** Spectral flux (1024 window, 512 hop), rolling-mean
+high-pass, local maxima merged within 90 ms; each peak keeps time, strength and
+spectral centroid. Strength decides whether a hit is played, brightness decides
+the lane. Cardiff's guitar stem gives 1006 peaks (136 / 333 / 713 notes).
 
 | Difficulty | Lanes | Keys | Scroll |
 |---|---|---|---|

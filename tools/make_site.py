@@ -108,6 +108,11 @@ PAGE = """<!DOCTYPE html>
           <button class="diff" data-diff="medium">MEDIUM</button>
           <button class="diff" data-diff="hard">HARD</button>
         </div>
+        <div class="sync-row">
+          <span>MUSIC START</span>
+          <input id="v-offset" type="range" min="0" max="100" step="1" value="0">
+          <b id="v-offset-val">0:00</b>
+        </div>
         <button id="v-play">&#9654; PLAY TRACK</button>
         <div class="v-status" id="v-status">CHECKING TRACK&hellip;</div>
         <button id="v-back">&#9664; BACK TO MAP</button>
@@ -166,6 +171,7 @@ PAGE = """<!DOCTYPE html>
 
 <script src="site/assets.js?v=__STAMP__"></script>
 __CHARTS__
+<script src="site/chords.js?v=__STAMP__"></script>
 <script src="site/chart.js?v=__STAMP__"></script>
 <script src="site/app.js?v=__STAMP__"></script>
 </body>
@@ -190,7 +196,7 @@ def main():
     # stylesheet or app.js can never linger after a rebuild.
     import hashlib
     sources = [open(os.path.join(SITE, name), "rb").read()
-               for name in ("style.css", "app.js", "chart.js", "charts.js")
+               for name in ("style.css", "app.js", "chart.js", "charts.js", "chords.js")
                if os.path.exists(os.path.join(SITE, name))]
     stamp = hashlib.md5(b"".join(sources)).hexdigest()[:8]
 
@@ -214,6 +220,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

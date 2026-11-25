@@ -1028,6 +1028,7 @@ const DIFFS = CE.DIFFS;
 const LANE_COL = ['#4ade80', '#f87171', '#fbbf24', '#60a5fa'];
 
 let difficulty = 'medium';
+let musicOffset = 0;      // seconds skipped into the recording before the chart starts
 const diff = () => DIFFS[difficulty];
 const laneW = () => 300 / diff().lanes;
 const laneX0 = () => (W - 300) / 2;
@@ -1036,7 +1037,7 @@ const STRIKE_Y = 500;
 const PERFECT = 0.07, GOOD = 0.15;  // hit windows, seconds
 
 const GH = {
-  stop: null, notes: [], idx: 0, duration: 0,
+  stop: null, notes: [], idx: 0, duration: 0, offset: 0,
   score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, miss: 0, total: 0,
   startMs: 0, audio: null, ready: false, fallback: false, over: true,
   flash: 0, lane: [0, 0, 0, 0], lastBeat: -1, burst: [],
@@ -1073,7 +1074,7 @@ function sfx(kind) {
 
 function ghClock() {
   if (GH.audio && GH.ready && !GH.fallback && !GH.audio.paused) {
-    return GH.audio.currentTime;
+    return Math.max(0, GH.audio.currentTime - GH.offset);
   }
   return (performance.now() - GH.startMs) / 1000;
 }
@@ -1125,16 +1126,31 @@ function ghStart(stop) {
     if (GH.stop !== stop) return;
     GH.fallback = fallback;
     GH.ready = true;
-    GH.duration = fallback ? 150 : (audio.duration || 150);
-    GH.notes = CE.buildChart({ peaks: ((window.CHARTS || {})[stop.slug] || {}).peaks,
-      duration: GH.duration, song: stop.song, city: stop.city, difficulty });
+
+    // The chart is written from the top of the tab; `musicOffset` skips that
+    // many seconds into the recording so the two line up.
+    const total = fallback ? 150 : (audio.duration || 150);
+    GH.offset = fallback ? 0 : Math.min(musicOffset, Math.max(0, total - 5));
+    GH.duration = Math.max(20, total - GH.offset);
+
+    GH.notes = CE.buildChart({
+      peaks: ((window.CHARTS || {})[stop.slug] || {}).peaks,
+      chordChart: (window.CHORDS || {})[stop.song],
+      duration: GH.duration,
+      song: stop.song,
+      city: stop.city,
+      difficulty,
+    });
     GH.total = GH.notes.length;
     GH.startMs = performance.now();
     GH.lastBeat = -1;
+
     if (!fallback) {
+      if (GH.offset > 0) audio.currentTime = GH.offset;
       audio.play().catch(() => {
         // autoplay refused: keep the chart running on the wall clock
         GH.fallback = true;
+        GH.offset = 0;
         GH.startMs = performance.now();
       });
     }
@@ -1407,6 +1423,7 @@ function enterVenue() {
   setScene('venue');
   paintNodes();
   paintDiff();
+  paintOffset();
   checkTrack(stop);
 }
 
@@ -1468,6 +1485,18 @@ document.querySelectorAll('.diff').forEach(b => {
     difficulty = b.dataset.diff;
     paintDiff();
   });
+});
+
+function paintOffset() {
+  const m = Math.floor(musicOffset / 60);
+  const s = String(musicOffset % 60).padStart(2, '0');
+  el('v-offset-val').textContent = `${m}:${s}`;
+  el('v-offset').value = String(musicOffset);
+}
+
+el('v-offset').addEventListener('input', e => {
+  musicOffset = Number(e.target.value) || 0;
+  paintOffset();
 });
 
 el('g-quit').addEventListener('click', ghFinish);

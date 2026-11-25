@@ -10,8 +10,58 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const Chart = require('../site/chart.js');
+const SongChords = require('../site/chords.js').CHORDS;
 
 const peak = (t, strength, centroid) => [t, strength, centroid];
+
+test('chord chart follows the tab, not the audio', () => {
+  const song = SongChords.Supersonic;
+  assert.ok(song, 'Supersonic chords should be loaded');
+
+  assert.equal(Chart.chordChart(song, 'easy').length, 120);   // one strum per chord
+  assert.equal(Chart.chordChart(song, 'medium').length, 240); // two
+  assert.equal(Chart.chordChart(song, 'hard').length, 480);   // four
+});
+
+test('chord chart uses every lane and stays in range', () => {
+  const song = SongChords.Supersonic;
+  for (const [difficulty, lanes] of [['easy', 3], ['medium', 4], ['hard', 4]]) {
+    const notes = Chart.chordChart(song, difficulty);
+    assert.ok(notes.every(n => n.lane >= 0 && n.lane < lanes));
+    assert.ok(new Set(notes.map(n => n.lane)).size >= 3, 'should use most lanes');
+    for (let i = 1; i < notes.length; i++) {
+      assert.ok(notes[i].t >= notes[i - 1].t, 'sorted');
+    }
+  }
+});
+
+test('hard strums eighths inside a chord', () => {
+  const song = SongChords.Supersonic;
+  const notes = Chart.chordChart(song, 'hard');
+  const beat = 60 / song.bpm;
+  assert.ok(Math.abs((notes[1].t - notes[0].t) - beat / 2) < 1e-6);
+});
+
+test('the solo is a gap, not a wall of notes', () => {
+  const song = SongChords.Supersonic;
+  const notes = Chart.chordChart(song, 'medium');
+  const beat = 60 / song.bpm;
+  const gaps = notes.slice(1).map((n, i) => n.t - notes[i].t);
+  assert.ok(Math.max(...gaps) >= 16 * beat - 0.01, 'solo gap should be silent');
+});
+
+test('buildChart prefers the authored chords', () => {
+  const song = SongChords.Supersonic;
+  const notes = Chart.buildChart({
+    chordChart: song,
+    peaks: [peak(1, 1, 0.5)],
+    duration: 200,
+    song: 'Supersonic',
+    city: 'CARDIFF',
+    difficulty: 'medium',
+  });
+  assert.equal(notes.length, 240);
+});
 
 test('lane is chosen by brightness, left to right', () => {
   const peaks = [peak(1, 1, 0.0), peak(2, 1, 0.49), peak(3, 1, 0.99)];

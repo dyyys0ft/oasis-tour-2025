@@ -270,6 +270,32 @@ body:not([data-scene="menu"]) .menu-ui { opacity: 0; pointer-events: none; }
 .diff:hover { color: #fff; border-color: var(--line-lit); }
 .diff.on { color: #000; background: #fff; border-color: #fff; }
 
+.sync-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px;
+}
+.sync-row span {
+  flex: 0 0 auto;
+  font-size: 9px; letter-spacing: 3px; color: var(--dimmer);
+}
+.sync-row input[type="range"] {
+  flex: 1; height: 4px; margin: 0;
+  -webkit-appearance: none; appearance: none;
+  background: #1e1e1e; outline: none; cursor: pointer;
+}
+.sync-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 18px; background: #fff; border: 0; border-radius: 0;
+}
+.sync-row input[type="range"]::-moz-range-thumb {
+  width: 10px; height: 18px; background: #fff; border: 0; border-radius: 0;
+}
+.sync-row b {
+  flex: 0 0 42px; text-align: right;
+  font-size: 10px; letter-spacing: 1px; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
 .setlist {
   margin: 20px auto 4px; padding: 14px;
   border: 1px dashed var(--line-lit);

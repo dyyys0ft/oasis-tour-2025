@@ -21,6 +21,11 @@ Both run on every push via `.github/workflows/tests.yml`.
 | fallback | no peaks -> `null` -> template chart |
 | determinism | the same city always yields the same template |
 | **real Cardiff chart** | exactly 136 / 333 / 713 notes per difficulty |
+| **chord chart** | the Supersonic tab gives 120 / 240 / 480 by difficulty |
+| **chord lanes** | every lane used, sorted, in range |
+| **strum spacing** | hard strums exact eighth notes |
+| **solo gap** | the 16-beat solo is silent |
+| **priority** | authored chords beat the peak chart |
 | **real chart shape** | sorted, unique, in range, medium spacing >= 0.22 s |
 
 `test_analyse.py` builds a click track at 120 BPM (12 clicks, one every
