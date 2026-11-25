@@ -1137,6 +1137,7 @@ function ghStart(stop) {
       peaks: ((window.CHARTS || {})[stop.slug] || {}).peaks,
       chordChart: (window.CHORDS || {})[stop.song],
       duration: GH.duration,
+      trackDuration: total,
       song: stop.song,
       city: stop.city,
       difficulty,

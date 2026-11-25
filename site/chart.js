@@ -160,15 +160,25 @@
   }
 
   // Hand-authored tab -> chart. Each chord is held for `beatsPerChord` and
-  // strummed 1 / 2 / 4 times depending on difficulty, so easy reads the chord
-  // changes and hard plays the eighth-note strumming.
-  function chordChart(song, difficulty) {
+  // strummed 1 / 2 / 4 times depending on difficulty. With `fit`, the grid is
+  // stretched so the last chord lands on the end of the recording.
+  function chordChart(song, difficulty, trackDuration) {
     const beat = 60 / song.bpm;
     const strums = { easy: 1, medium: 2, hard: 4 }[difficulty] || 2;
     const lanes = (DIFFS[difficulty] || DIFFS.medium).lanes;
-    const span = song.beatsPerChord || 2;
     const notes = [];
-    let t = 0;
+
+    const flat = [];
+    for (const section of song.sections) {
+      if (section.gap) { flat.push({ gap: section.gap }); continue; }
+      for (const line of section.lines) for (const chord of line) flat.push({ chord });
+    }
+
+    const chords = flat.filter(f => f.chord).length;
+    let span = song.beatsPerChord || 2;
+    if (song.fit && trackDuration && chords) {
+      span = (trackDuration * song.bpm / 60) / chords;
+    }
 
     const laneFor = (chord) => {
       const base = song.lanes && song.lanes[chord] != null
@@ -177,22 +187,19 @@
       return Math.min(lanes - 1, Math.max(0, Math.floor(base * lanes / 4)));
     };
 
-    for (const section of song.sections) {
-      if (section.gap) { t += section.gap * beat; continue; }
-      for (const line of section.lines) {
-        for (const chord of line) {
-          const lane = laneFor(chord);
-          for (let s = 0; s < strums; s++) {
-            notes.push({
-              t: t + (span * s / strums) * beat,
-              lane,
-              hit: false,
-              judged: false,
-            });
-          }
-          t += span * beat;
-        }
+    let t = 0;
+    for (const item of flat) {
+      if (item.gap) { t += item.gap * beat; continue; }
+      const lane = laneFor(item.chord);
+      for (let s = 0; s < strums; s++) {
+        notes.push({
+          t: t + (span * s / strums) * beat,
+          lane,
+          hit: false,
+          judged: false,
+        });
       }
+      t += span * beat;
     }
 
     notes.sort((a, b) => a.t - b.t);
@@ -201,7 +208,8 @@
 
   function buildChart(opts) {
     if (opts.chordChart) {
-      const notes = chordChart(opts.chordChart, opts.difficulty);
+      const notes = chordChart(opts.chordChart, opts.difficulty,
+                               opts.trackDuration || opts.duration);
       if (notes.length) return notes;
     }
     return chartFromPeaks(opts.peaks, opts.duration, opts.difficulty)

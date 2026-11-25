@@ -1,8 +1,8 @@
-# Roadmap
+﻿# Roadmap
 
-## Stage 1 — tour map ✅
+## Stage 1 â€” tour map âœ…
 
-`menu → PLAY → choose player → tour maze → walk → Enter → venue`
+`menu â†’ PLAY â†’ choose player â†’ tour maze â†’ walk â†’ Enter â†’ venue`
 
 - A maze of 18 rooms (6 x 3) joined by a spanning tree plus a few braided
   doorways, so it is explorable but never a single dead-end snake. One cell of
@@ -20,7 +20,7 @@
   opens it. Clicking a pad runs BFS over the maze and auto-walks the route.
 - The four corner floodlights are drawn live each frame, aimed at the token.
 
-## Venue dressing ✅
+## Venue dressing âœ…
 
 Every venue is themed from `stop.country`:
 
@@ -33,7 +33,7 @@ Every venue is themed from `stop.country`:
   a baseball in the USA, a thistle in Scotland, a rose in England, a daffodil
   in Wales, a fan in Korea.
 
-## Stage 2 — the guitar engine ✅
+## Stage 2 â€” the guitar engine âœ…
 
 **The chart comes from the tab, not from the audio.** `site/chords.js` holds the
 song as data: BPM, how long each chord is held, a chord-to-lane map, and the
@@ -45,19 +45,17 @@ sections written line by line from the transcription.
 ```
 
 `chordChart()` walks those lines, turns each chord into 1 / 2 / 4 evenly spaced
-strums (easy / medium / hard) and picks the lane from the chord map. Supersonic
-gives **120 / 240 / 480** notes and runs 151 s; the solo is inserted as a silent
-16-beat gap.
+strums (easy / medium / hard) and picks the lane from the chord map. The tab has 176 chords; Supersonic gives **176 / 352 / 704** notes and with it stretches
+to land exactly on the recording's 201 s.
 
-**Music offset.** The tab starts at the first verse, the record starts with an
-intro. `MUSIC START` is a 0-100 s slider on the venue card: it seeks the MP3 to
-that timecode and the chart starts at zero, so the two line up without a silent
-wait. The clock is `audio.currentTime - offset`.
+**Music offset.** The tab now covers the whole record, intro included, so
+`MUSIC START` is a 0-100 s fine-tune: it seeks the MP3 to that timecode and the
+chart starts at zero. The clock is `audio.currentTime - offset`.
 
 **Fallbacks.** A song with no authored chords still gets a chart: separated
 guitar-stem onsets if `songs/<city>.json` exists, else the beat-grid template.
 The analyser (`tools/analyze_song.py`, optionally `--guitar` after Demucs) is
-kept for those cases — it is no longer what Supersonic uses.
+kept for those cases â€” it is no longer what Supersonic uses.
 
 **Analyser, for reference.** Spectral flux (1024 window, 512 hop), rolling-mean
 high-pass, local maxima merged within 90 ms; each peak keeps time, strength and
@@ -70,18 +68,18 @@ the lane. Cardiff's guitar stem gives 1006 peaks (136 / 333 / 713 notes).
 | Medium | 4 | D F G H | 220 px/s |
 | Hard | 4 | D F G H | 320 px/s |
 
-Feedback: ±70 ms PERFECT, ±140 ms GOOD. A timed hit flashes that lane in its
+Feedback: Â±70 ms PERFECT, Â±140 ms GOOD. A timed hit flashes that lane in its
 colour (green / red / amber / blue), fires an expanding ring at the strike line
-and plays a synthesised blip — brighter for perfect, dull thud for a miss.
+and plays a synthesised blip â€” brighter for perfect, dull thud for a miss.
 
 The clock is `audio.currentTime`, so notes are positioned from the track's own
 playhead and stay in sync through buffering or seeking. With no file the engine
 falls back to the wall clock plus a metronome on the beat.
 
-## Stage 3 — records
+## Stage 3 â€” records
 
 Scores are already persisted, minimally: `localStorage['ogt.progress']` holds a
-map of city slug → best score, and the unlock total is their sum. That is the
+map of city slug â†’ best score, and the unlock total is their sum. That is the
 same shape a server would receive:
 
 ```json
@@ -93,6 +91,7 @@ read at startup with a fetch; nothing else changes.
 
 ## Decisions still open
 
-1. **Difficulty** — one chart per song, or three generated from the same seed
+1. **Difficulty** â€” one chart per song, or three generated from the same seed
    with different density filters?
-2. **Who plays** — one character for the whole tour, or a switch at any venue?
+2. **Who plays** â€” one character for the whole tour, or a switch at any venue?
+

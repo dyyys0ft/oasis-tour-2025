@@ -1,4 +1,4 @@
-# OasisGuitarTour
+﻿# OasisGuitarTour
 
 16-bit Britpop in the Oasis Live '25 livery: black and white everywhere, a
 chrome 2025 lockup, and a world tour you walk around as Noel or Liam.
@@ -31,8 +31,8 @@ MENU  ->  PLAY  ->  CHOOSE PLAYER  ->  STADIUM MAP  ->  "GO INSIDE?"  ->  VENUE 
 - **Venue** - themed for the country: a 16-bit flag banner, bunting in the flag
   colours, the stage tinted to match, and the character wearing or holding a
   local prop (sombrero in Mexico, football in Brazil, pint in Ireland...).
-  Pick EASY / MEDIUM / HARD, set **MUSIC START** (0-100 s) to skip the intro so
-  the tab lines up with the record, then PLAY TRACK.
+  Pick EASY / MEDIUM / HARD, set **MUSIC START** (0-100 s) to fine-tune
+  the alignment with the record, then PLAY TRACK.
 - **Guitar engine** - the chart is the song's chord tab: each chord is held and
   strummed on a lane, 1 / 2 / 4 strums per chord by difficulty. Keys
   D F G / D F G H. Timed hits flash the lane in its colour and play a blip.
@@ -128,3 +128,4 @@ The menu loop is resampled to 22.05 kHz and quantised to 6 bits in numpy
 (ffmpeg's `acrusher` filter is a no-op in the build on this machine). The
 quantisation sits about 16 dB below the music: clearly crunchy, still
 listenable. Change `BITS` in `tools/make_audio.py` to taste.
+

@@ -1,4 +1,4 @@
-/* Chart engine tests:  node --test tests/
+﻿/* Chart engine tests:  node --test tests/
  *
  * These cover the "song -> playable chart" step: peak filtering by difficulty,
  * lane assignment by brightness, spacing, and the real chart built from the
@@ -18,9 +18,9 @@ test('chord chart follows the tab, not the audio', () => {
   const song = SongChords.Supersonic;
   assert.ok(song, 'Supersonic chords should be loaded');
 
-  assert.equal(Chart.chordChart(song, 'easy').length, 120);   // one strum per chord
-  assert.equal(Chart.chordChart(song, 'medium').length, 240); // two
-  assert.equal(Chart.chordChart(song, 'hard').length, 480);   // four
+  assert.equal(Chart.chordChart(song, 'easy').length, 176);   // one strum per chord
+  assert.equal(Chart.chordChart(song, 'medium').length, 352); // two
+  assert.equal(Chart.chordChart(song, 'hard').length, 704);   // four
 });
 
 test('chord chart uses every lane and stays in range', () => {
@@ -42,12 +42,12 @@ test('hard strums eighths inside a chord', () => {
   assert.ok(Math.abs((notes[1].t - notes[0].t) - beat / 2) < 1e-6);
 });
 
-test('the solo is a gap, not a wall of notes', () => {
+test('fit stretches the tab onto the recording', () => {
   const song = SongChords.Supersonic;
-  const notes = Chart.chordChart(song, 'medium');
-  const beat = 60 / song.bpm;
-  const gaps = notes.slice(1).map((n, i) => n.t - notes[i].t);
-  assert.ok(Math.max(...gaps) >= 16 * beat - 0.01, 'solo gap should be silent');
+  const notes = Chart.chordChart(song, 'medium', 200.9);
+  const last = notes[notes.length - 1].t;
+  assert.ok(last > 198 && last <= 200.9, `last note at ${last.toFixed(2)}s`);
+  assert.equal(notes.length, 352);
 });
 
 test('buildChart prefers the authored chords', () => {
@@ -60,7 +60,7 @@ test('buildChart prefers the authored chords', () => {
     city: 'CARDIFF',
     difficulty: 'medium',
   });
-  assert.equal(notes.length, 240);
+  assert.equal(notes.length, 352);
 });
 
 test('lane is chosen by brightness, left to right', () => {
@@ -164,3 +164,4 @@ test('real chart is sorted, unique and in range', () => {
   const gaps = notes.slice(1).map((n, i) => n.t - notes[i].t);
   assert.ok(Math.min(...gaps) >= 0.22 - 1e-9, 'medium spacing must hold');
 });
+

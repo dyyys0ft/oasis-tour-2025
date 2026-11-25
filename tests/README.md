@@ -21,10 +21,10 @@ Both run on every push via `.github/workflows/tests.yml`.
 | fallback | no peaks -> `null` -> template chart |
 | determinism | the same city always yields the same template |
 | **real Cardiff chart** | exactly 136 / 333 / 713 notes per difficulty |
-| **chord chart** | the Supersonic tab gives 120 / 240 / 480 by difficulty |
+| **chord chart** | the Supersonic tab gives 176 / 352 / 704 by difficulty |
 | **chord lanes** | every lane used, sorted, in range |
 | **strum spacing** | hard strums exact eighth notes |
-| **solo gap** | the 16-beat solo is silent |
+| **fit** | the grid stretches to end on the recording's last second |
 | **priority** | authored chords beat the peak chart |
 | **real chart shape** | sorted, unique, in range, medium spacing >= 0.22 s |
 
@@ -46,4 +46,5 @@ so the change is deliberate rather than accidental.
 
 There is no browser test. The lane HUD, hit windows and scoring are verified by
 hand; adding Playwright would close that gap.
+
 
