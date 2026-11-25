@@ -8,6 +8,9 @@
   doorways, so it is explorable but never a single dead-end snake. One cell of
   wall sits between rooms, which makes every corridor 64 px wide and lets the
   walls be drawn as 64 px brick blocks.
+- Walls live on their own cached layer and are blitted **over** the character,
+  so he walks behind them instead of clipping through. Signs are drawn after
+  the walls so they always stay readable.
 - `genMaze()` is deterministic (`mulberry32(2025)`), so the layout is stable.
 - Movement is free and collides with the bricks: the feet box is 34 x 18 px and
   each axis is resolved separately, so you slide along walls rather than

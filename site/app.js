@@ -944,7 +944,8 @@ function drawBrick(b, x, y) {
 }
 
 function drawMaze(b) {
-  // floor
+  // floor only; the walls live on their own layer so they can be drawn over
+  // the character, which reads as depth
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
       if (maze[r][c]) continue;
@@ -956,13 +957,23 @@ function drawMaze(b) {
       b.fillRect(x, y, 1, TILE);
     }
   }
+}
 
-  // walls
+let wallsLayer = null;
+
+function ensureWalls() {
+  if (wallsLayer) return wallsLayer;
+  wallsLayer = document.createElement('canvas');
+  wallsLayer.width = W;
+  wallsLayer.height = H;
+  const b = wallsLayer.getContext('2d');
+  b.imageSmoothingEnabled = false;
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
       if (maze[r][c]) drawBrick(b, MAZE_X + c * TILE, MAZE_Y + r * TILE);
     }
   }
+  return wallsLayer;
 }
 
 /* ------------------------------------------------------------------- menu */
@@ -1090,7 +1101,7 @@ function renderMap() {
   ctx.drawImage(bg('map'), 0, 0);
   drawFollowLights();
 
-  // stop pads: a little platform in each room, plus its flag and name
+  // stop pads sit on the floor, under the walls
   TOUR.forEach((stop, i) => {
     const locked = !isUnlocked(i);
     const near = i === atNode;
@@ -1105,27 +1116,9 @@ function renderMap() {
       ctx.lineWidth = 2;
       ctx.strokeRect(stop.x - padW / 2 - 4, stop.y + 6, padW + 8, padH + 8);
     }
-
-    // label chip: flag + city, readable over the bricks
-    const label = stop.city;
-    ctx.font = '7px ui-monospace, Consolas, monospace';
-    const tw = ctx.measureText(label).width;
-    const rowW = 18 + 4 + tw;
-    const lx = Math.round(stop.x - rowW / 2);
-    const ly = Math.round(stop.y + 24);
-
-    ctx.fillStyle = 'rgba(0,0,0,.72)';
-    ctx.fillRect(lx - 3, ly - 1, rowW + 6, 13);
-
-    ctx.imageSmoothingEnabled = false;
-    ctx.globalAlpha = locked ? 0.45 : 1;
-    ctx.drawImage(flagCanvas(stop.country), lx, ly + 1, 18, 11);
-    ctx.globalAlpha = 1;
-
-    ctx.fillStyle = locked ? '#6a6a6a' : (near ? '#ffffff' : '#b4b4b4');
-    ctx.fillText(label, lx + 22, ly + 9);
   });
 
+  // character, then the bricks over him, then the signs on top of both
   const S = 1;
   const pulse = 0.5 + 0.5 * Math.sin(t * 4);
   shadow(actx, pos.x, pos.y + 2, 16, 4);
@@ -1136,6 +1129,31 @@ function renderMap() {
   actx.stroke();
   drawCell(actx, IMG.walk, walkFrame() * SPRITE, player * SPRITE,
            Math.round(pos.x) - SPRITE * S / 2, Math.round(pos.y) - FEET * S, S);
+
+  actx.drawImage(ensureWalls(), 0, 0);
+
+  TOUR.forEach((stop, i) => {
+    const locked = !isUnlocked(i);
+    const near = i === atNode;
+    const label = stop.city;
+
+    actx.font = '7px ui-monospace, Consolas, monospace';
+    const tw = actx.measureText(label).width;
+    const rowW = 18 + 4 + tw;
+    const lx = Math.round(stop.x - rowW / 2);
+    const ly = Math.round(stop.y + 24);
+
+    actx.fillStyle = 'rgba(0,0,0,.78)';
+    actx.fillRect(lx - 3, ly - 1, rowW + 6, 13);
+
+    actx.imageSmoothingEnabled = false;
+    actx.globalAlpha = locked ? 0.45 : 1;
+    actx.drawImage(flagCanvas(stop.country), lx, ly + 1, 18, 11);
+    actx.globalAlpha = 1;
+
+    actx.fillStyle = locked ? '#6a6a6a' : (near ? '#ffffff' : '#b4b4b4');
+    actx.fillText(label, lx + 22, ly + 9);
+  });
 }
 
 /* ------------------------------------------------------------------ venue */
