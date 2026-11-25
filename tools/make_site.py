@@ -166,6 +166,7 @@ PAGE = """<!DOCTYPE html>
 
 <script src="site/assets.js?v=__STAMP__"></script>
 __CHARTS__
+<script src="site/chart.js?v=__STAMP__"></script>
 <script src="site/app.js?v=__STAMP__"></script>
 </body>
 </html>

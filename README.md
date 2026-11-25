@@ -59,6 +59,15 @@ python tools/make_site.py        # index.html + assets.js
 python tools/make_viewer.py      # dev sprite viewer         -> sprites.html
 ```
 
+## Tests
+
+```
+node --test tests/chart.test.js     # chart rules
+python tests/test_analyse.py        # audio -> peaks
+```
+
+See `tests/README.md` for what each one covers.
+
 `analyze_song.py` is the important one for gameplay: it detects onsets in every
 MP3 in `songs/`, ranks them by strength and writes a chart the engine plays.
 Re-run it whenever you add a track, then re-run `make_site.py`.

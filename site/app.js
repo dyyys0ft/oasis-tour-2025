@@ -19,6 +19,7 @@ for (const [k, src] of Object.entries(window.ASSETS)) {
 
 const cv = document.getElementById('stage');
 const ctx = cv.getContext('2d');
+const CE = window.ChartEngine;
 const ac = document.getElementById('actors');
 const actx = ac.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -47,7 +48,7 @@ const roomCentre = (rc, rr) => ({
 });
 
 function genMaze(seed) {
-  const rng = mulberry32(seed);
+  const rng = CE.mulberry32(seed);
   const cells = Array.from({ length: MAZE_ROWS }, () => Array(MAZE_COLS).fill(1));
   const seen = new Set();
 
@@ -132,150 +133,6 @@ for (const stop of TOUR) {
 }
 
 /* ------------------------------------------------------------ song chart */
-
-// Tempo per song. Cardiff's was measured from the supplied recording (onset
-// autocorrelation + beat-grid fit); the rest are the known Oasis tempos and
-// will be re-measured per file as tracks arrive.
-const SONG_META = {
-  'Supersonic':              { bpm: 101, offset: 0.14 },
-  'Live Forever':            { bpm: 78 },
-  'Wonderwall':              { bpm: 87 },
-  "Don't Look Back in Anger": { bpm: 82 },
-  'Some Might Say':          { bpm: 112 },
-  'Morning Glory':           { bpm: 137 },
-  'Cigarettes & Alcohol':    { bpm: 128 },
-  "Rock 'n' Roll Star":      { bpm: 152 },
-  'Champagne Supernova':     { bpm: 75 },
-  'Acquiesce':               { bpm: 148 },
-  'Hello':                   { bpm: 118 },
-  'Whatever':                { bpm: 92 },
-  'Roll with It':            { bpm: 124 },
-  'Slide Away':              { bpm: 100 },
-  'Stand by Me':             { bpm: 100 },
-  'Cast No Shadow':          { bpm: 82 },
-  'The Masterplan':          { bpm: 76 },
-};
-
-// One-bar eighth-note grids per instrument. The lane an instrument maps to is
-// what makes the chart "feel" like the record: guitar doubles up, drums sit
-// centre, vocals ride the outside lane.
-const PATTERNS = {
-  guitar: [[1,0,1,0, 1,0,1,1], [1,1,0,1, 1,0,1,0], [1,0,0,1, 0,1,1,0]],
-  bass:   [[1,0,0,0, 1,0,0,1], [1,0,0,1, 1,0,0,0]],
-  drums:  [[1,0,1,0, 1,0,1,0], [1,0,0,1, 1,0,1,1]],
-  vox:    [[1,1,0,1, 0,1,1,0], [1,0,1,0, 1,1,0,1]],
-};
-
-const LANE_OF = {
-  guitar: (n, r) => (r() < 0.5 ? 0 : 1),
-  drums: () => 1,
-  bass: (n) => n - 1,
-  vox: (n) => (n >= 4 ? 2 : n - 1),
-};
-
-const ARRANGEMENT = [
-  { tracks: ['drums', 'bass'],                density: 0.45, label: 'INTRO' },
-  { tracks: ['guitar', 'bass', 'drums'],      density: 0.70, label: 'VERSE' },
-  { tracks: ['guitar', 'bass', 'drums', 'vox'], density: 0.90, label: 'CHORUS' },
-  { tracks: ['guitar', 'drums'],              density: 0.80, label: 'SOLO' },
-  { tracks: ['guitar', 'bass', 'drums', 'vox'], density: 1.00, label: 'CHORUS' },
-  { tracks: ['guitar', 'bass', 'drums'],      density: 0.55, label: 'OUTRO' },
-];
-
-function hashStr(s) {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return h >>> 0;
-}
-
-function mulberry32(a) {
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// A song plus its tempo becomes a note chart. Deterministic: the same city
-// always produces the same chart.
-// How much of the peak list each difficulty keeps. Easy takes only the
-// strongest transients, hard takes nearly everything, and both use a minimum
-// spacing so the board never becomes a wall.
-const DIFF_PEAKS = {
-  easy:   { strength: 0.45, gap: 0.40 },
-  medium: { strength: 0.28, gap: 0.22 },
-  hard:   { strength: 0.14, gap: 0.11 },
-};
-
-// A real chart: onsets detected from the recording, ranked by strength, with
-// the lane chosen by how bright the hit is. Low/dark -> left, bright -> right.
-function chartFromPeaks(stop) {
-  const c = window.CHARTS && window.CHARTS[stop.slug];
-  if (!c || !c.peaks || !c.peaks.length) return null;
-
-  const cfg = DIFF_PEAKS[difficulty];
-  const lanes = diff().lanes;
-  const notes = [];
-  let last = -1e9;
-
-  for (const [t, strength, centroid] of c.peaks) {
-    if (t > c.duration - 1.5) break;
-    if (strength < cfg.strength) continue;
-    if (t - last < cfg.gap) continue;
-    last = t;
-    const lane = Math.min(lanes - 1, Math.max(0, Math.floor(centroid * lanes)));
-    notes.push({ t, lane, hit: false, judged: false });
-  }
-  return notes.length ? notes : null;
-}
-
-// Fallback when a city has no analysed chart: a rhythmic template on the
-// song's beat grid. Same generator as before, still deterministic.
-function buildChart(stop, duration, lanes) {
-  const fromPeaks = chartFromPeaks(stop);
-  if (fromPeaks) return fromPeaks;
-
-  const meta = SONG_META[stop.song] || { bpm: 100, offset: 0 };
-  const rng = mulberry32(hashStr(stop.city + stop.song + difficulty));
-  const beat = 60 / meta.bpm;
-  const bar = beat * 4;
-  const offset = meta.offset || 0;
-  const notes = [];
-  const seen = new Set();
-
-  const bars = Math.max(1, Math.floor((duration - offset - 2) / bar));
-
-  for (let b = 0; b < bars; b++) {
-    const arr = ARRANGEMENT[Math.floor(b / 8) % ARRANGEMENT.length];
-    const t0 = offset + b * bar;
-
-    for (let slot = 0; slot < 8; slot++) {
-      const t = t0 + slot * (beat / 2);
-      const instruments = [];
-      for (const name of arr.tracks) {
-        const pats = PATTERNS[name];
-        const pat = pats[Math.floor(rng() * pats.length)];
-        if (pat[slot] && rng() < arr.density) instruments.push(name);
-      }
-      if (!instruments.length) continue;
-
-      // never more than two notes on a single slot, and never a repeat lane
-      instruments.length = Math.min(instruments.length, 2);
-      for (const name of instruments) {
-        const lane = LANE_OF[name](lanes, rng);
-        if (lane < 0 || lane >= lanes) continue;
-        const key = lane + '@' + Math.round(t * 1000);
-        if (seen.has(key)) continue;
-        seen.add(key);
-        notes.push({ t, lane, hit: false, judged: false });
-      }
-    }
-  }
-
-  notes.sort((a, b) => a.t - b.t);
-  return notes;
-}
 
 /* ----------------------------------------------------------------- flags */
 
@@ -887,7 +744,7 @@ function stadium(b) {
   ellipseFill(b, 480, 326, 452, 254, '#0b0b0b');
 
   // crowd speckle, deterministic so it never shimmers
-  const rng = mulberry32(2025);
+  const rng = CE.mulberry32(2025);
   for (let i = 0; i < 1400; i++) {
     const a = rng() * Math.PI * 2;
     const rad = 0.80 + rng() * 0.18;
@@ -1177,13 +1034,8 @@ function renderVenue() {
 
 /* ----------------------------------------------------------------- guitar */
 
-// Three difficulties: easy trims the board to 3 lanes, medium runs 4, hard
-// runs the same 4 lanes at a faster scroll.
-const DIFFS = {
-  easy:   { lanes: 3, keys: ['d', 'f', 'g'],       speed: 150, label: 'EASY' },
-  medium: { lanes: 4, keys: ['d', 'f', 'g', 'h'],  speed: 220, label: 'MEDIUM' },
-  hard:   { lanes: 4, keys: ['d', 'f', 'g', 'h'],  speed: 320, label: 'HARD' },
-};
+// Chart rules live in site/chart.js so they can be tested in Node.
+const DIFFS = CE.DIFFS;
 const LANE_COL = ['#4ade80', '#f87171', '#fbbf24', '#60a5fa'];
 
 let difficulty = 'medium';
@@ -1285,7 +1137,8 @@ function ghStart(stop) {
     GH.fallback = fallback;
     GH.ready = true;
     GH.duration = fallback ? 150 : (audio.duration || 150);
-    GH.notes = buildChart(stop, GH.duration, diff().lanes);
+    GH.notes = CE.buildChart({ peaks: ((window.CHARTS || {})[stop.slug] || {}).peaks,
+      duration: GH.duration, song: stop.song, city: stop.city, difficulty });
     GH.total = GH.notes.length;
     GH.startMs = performance.now();
     GH.lastBeat = -1;
@@ -1787,6 +1640,9 @@ paintSound();
 paintNodes();
 updateTotals();
 requestAnimationFrame(loop);
+
+
+
 
 
 
