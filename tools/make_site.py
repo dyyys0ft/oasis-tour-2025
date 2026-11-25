@@ -75,8 +75,16 @@ PAGE = """<!DOCTYPE html>
         </div>
         <span class="who" id="map-who">NOEL</span>
       </header>
-      <div id="nodes"></div>
-      <p class="map-hint">ARROWS TO WALK &middot; ENTER TO GO INSIDE</p>
+
+      <div id="stop-bar">
+        <canvas id="sb-flag" width="32" height="20"></canvas>
+        <div class="sb-main">
+          <b id="sb-city">THE MAZE</b>
+          <span id="sb-song">Follow the corridors to a door</span>
+        </div>
+        <div class="sb-state" id="sb-state"></div>
+        <div class="sb-hint" id="sb-hint">ARROWS TO WALK</div>
+      </div>
     </section>
 
     <!-- venue -->

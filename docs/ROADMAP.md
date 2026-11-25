@@ -2,26 +2,20 @@
 
 ## Stage 1 — tour map ✅
 
-`menu → PLAY → choose player → stadium matrix → walk → Enter → venue`
+`menu → PLAY → choose player → tour maze → walk → Enter → venue`
 
-- One node per city, in show order, from the Oasis Live '25 itinerary:
-  Cardiff, Manchester, London, Edinburgh, Dublin, Toronto, Chicago,
-  East Rutherford, Pasadena, Mexico City, Goyang, Tokyo, Melbourne, Sydney,
-  Buenos Aires, Santiago, São Paulo.
-- The map is a stadium bowl plus a 6 x 3 matrix of pitches (`GRID`), one cell
-  per stop. Movement is free: arrow keys walk the token at 300 px/s in any
-  direction, clamped to the pitch. There is no fixed route.
-- The four corner floodlights are drawn live each frame, aimed at the token,
-  so the light sweeps the pitch as you move.
-- `atNode` is recomputed every frame as the nearest stop within 42 px; **Enter**
-  opens it, clicking a cell walks to it.
-- `TOUR` in `site/app.js` is the single source of truth (country, venue, date,
-  song, cell, derived file path).
-- Each cell shows the city, the song, the country flag and its unlock cost.
-  Progression is the **sum of your best score at each stop**
-  (`unlockFor(i) = max(0, (i - 2) * 12000)`), stored in `localStorage` under
-  `ogt.progress`. Locked stops still show their flag and price; entering one
-  opens a "needs 24,000 pts" panel instead of the venue.
+- A maze of 18 rooms (6 x 3) joined by a spanning tree plus a few braided
+  doorways, so it is explorable but never a single dead-end snake. One cell of
+  wall sits between rooms, which makes every corridor 64 px wide and lets the
+  walls be drawn as 64 px brick blocks.
+- `genMaze()` is deterministic (`mulberry32(2025)`), so the layout is stable.
+- Movement is free and collides with the bricks: the feet box is 34 x 18 px and
+  each axis is resolved separately, so you slide along walls rather than
+  sticking. `MAP_SPEED = 190`.
+- Stops take rooms in boustrophedon order. `atNode` is the nearest stop within
+  40 px; the bottom bar shows its song, flag and unlock price, and **Enter**
+  opens it. Clicking a pad runs BFS over the maze and auto-walks the route.
+- The four corner floodlights are drawn live each frame, aimed at the token.
 
 ## Venue dressing ✅
 

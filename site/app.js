@@ -26,36 +26,103 @@ actx.imageSmoothingEnabled = false;
 
 /* ------------------------------------------------------------------ tour */
 
-// A 6 x 3 matrix of pitches. Every stop is a cell; the token moves freely
-// between them with the arrow keys.
-// Matrix cell centres and the four corner lamps that track the player.
-const LIGHTS = [[54, 96], [906, 96], [54, 560], [906, 560]];
+/* ------------------------------------------------------------------ maze */
 
-const GRID = { x0: 90, y0: 150, cw: 130, ch: 130, cols: 6, rows: 3 };
-const cell = (c, r) => ({
-  x: GRID.x0 + GRID.cw * (c + 0.5),
-  y: GRID.y0 + GRID.ch * (r + 0.5),
+// A room maze: 6 x 3 rooms of 64 px, one cell of wall between them, so every
+// corridor is wide enough for a sprite and the walls can be drawn as bricks.
+const TILE = 64;
+const ROOM_COLS = 6, ROOM_ROWS = 3;
+const MAZE_COLS = ROOM_COLS * 2 + 1;   // 13
+const MAZE_ROWS = ROOM_ROWS * 2 + 1;   // 7
+const MAZE_W = MAZE_COLS * TILE;       // 832
+const MAZE_H = MAZE_ROWS * TILE;       // 448
+const MAZE_X = (W - MAZE_W) / 2;       // 64
+const MAZE_Y = 86;
+
+const LIGHTS = [[52, 74], [908, 74], [52, 546], [908, 546]];
+
+const roomCentre = (rc, rr) => ({
+  x: MAZE_X + (1 + rc * 2 + 0.5) * TILE,
+  y: MAZE_Y + (1 + rr * 2 + 0.5) * TILE,
 });
 
+function genMaze(seed) {
+  const rng = mulberry32(seed);
+  const cells = Array.from({ length: MAZE_ROWS }, () => Array(MAZE_COLS).fill(1));
+  const seen = new Set();
+
+  (function carve(rc, rr) {
+    const cx = 1 + rc * 2, cy = 1 + rr * 2;
+    cells[cy][cx] = 0;
+    seen.add(rc + ',' + rr);
+
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    while (dirs.length) {
+      const [dc, dr] = dirs.splice(Math.floor(rng() * dirs.length), 1)[0];
+      const nc = rc + dc, nr = rr + dr;
+      if (nc < 0 || nc >= ROOM_COLS || nr < 0 || nr >= ROOM_ROWS) continue;
+      if (seen.has(nc + ',' + nr)) continue;
+      cells[cy + dr][cx + dc] = 0;
+      carve(nc, nr);
+    }
+  })(0, 0);
+
+  // braid: a few extra doorways so it is not one long dead-end snake
+  let extra = 5;
+  for (let rr = 0; rr < ROOM_ROWS && extra; rr++) {
+    for (let rc = 0; rc < ROOM_COLS && extra; rc++) {
+      for (const [dc, dr] of [[1, 0], [0, 1]]) {
+        const nc = rc + dc, nr = rr + dr;
+        if (nc >= ROOM_COLS || nr >= ROOM_ROWS) continue;
+        const wx = 1 + rc * 2 + dc, wy = 1 + rr * 2 + dr;
+        if (cells[wy][wx] === 1 && rng() < 0.45) {
+          cells[wy][wx] = 0;
+          extra--;
+        }
+      }
+    }
+  }
+  return cells;
+}
+
+const maze = genMaze(2025);
+
 const TOUR = [
-  { city: 'CARDIFF',         country: 'WALES',        venue: 'PRINCIPALITY STADIUM', date: '4 JUL 2025',  song: 'Supersonic',              ...cell(0, 0) },
-  { city: 'MANCHESTER',      country: 'ENGLAND',      venue: 'HEATON PARK',          date: '11 JUL 2025', song: 'Live Forever',            ...cell(1, 0) },
-  { city: 'LONDON',          country: 'ENGLAND',      venue: 'WEMBLEY STADIUM',      date: '25 JUL 2025', song: "Don't Look Back in Anger", ...cell(2, 0) },
-  { city: 'EDINBURGH',       country: 'SCOTLAND',     venue: 'MURRAYFIELD',          date: '8 AUG 2025',  song: 'Some Might Say',          ...cell(3, 0) },
-  { city: 'DUBLIN',          country: 'IRELAND',      venue: 'CROKE PARK',           date: '16 AUG 2025', song: 'Wonderwall',              ...cell(4, 0) },
-  { city: 'TORONTO',         country: 'CANADA',       venue: 'ROGERS STADIUM',       date: '24 AUG 2025', song: 'Morning Glory',           ...cell(5, 0) },
-  { city: 'CHICAGO',         country: 'USA',          venue: 'SOLDIER FIELD',        date: '28 AUG 2025', song: 'Cigarettes & Alcohol',    ...cell(0, 1) },
-  { city: 'EAST RUTHERFORD', country: 'USA',          venue: 'METLIFE STADIUM',      date: '31 AUG 2025', song: "Rock 'n' Roll Star",      ...cell(1, 1) },
-  { city: 'PASADENA',        country: 'USA',          venue: 'ROSE BOWL',            date: '6 SEP 2025',  song: 'Champagne Supernova',     ...cell(2, 1) },
-  { city: 'MEXICO CITY',     country: 'MEXICO',       venue: 'ESTADIO GNP SEGUROS',  date: '12 SEP 2025', song: 'Acquiesce',               ...cell(3, 1) },
-  { city: 'GOYANG',          country: 'SOUTH KOREA',  venue: 'GOYANG STADIUM',       date: '21 OCT 2025', song: 'Hello',                   ...cell(4, 1) },
-  { city: 'TOKYO',           country: 'JAPAN',        venue: 'TOKYO DOME',           date: '25 OCT 2025', song: 'Whatever',                ...cell(5, 1) },
-  { city: 'MELBOURNE',       country: 'AUSTRALIA',    venue: 'MARVEL STADIUM',       date: '31 OCT 2025', song: 'Roll with It',            ...cell(0, 2) },
-  { city: 'SYDNEY',          country: 'AUSTRALIA',    venue: 'ACCOR STADIUM',        date: '7 NOV 2025',  song: 'Slide Away',              ...cell(1, 2) },
-  { city: 'BUENOS AIRES',    country: 'ARGENTINA',    venue: 'MAS MONUMENTAL',       date: '15 NOV 2025', song: 'Stand by Me',             ...cell(2, 2) },
-  { city: 'SANTIAGO',        country: 'CHILE',        venue: 'ESTADIO NACIONAL',     date: '19 NOV 2025', song: 'Cast No Shadow',          ...cell(3, 2) },
-  { city: 'SAO PAULO',       country: 'BRAZIL',       venue: 'MORUMBIS',             date: '22 NOV 2025', song: 'The Masterplan',          ...cell(4, 2) },
+  { city: 'CARDIFF',         country: 'WALES',        venue: 'PRINCIPALITY STADIUM', date: '4 JUL 2025',  song: 'Supersonic' },
+  { city: 'MANCHESTER',      country: 'ENGLAND',      venue: 'HEATON PARK',          date: '11 JUL 2025', song: 'Live Forever' },
+  { city: 'LONDON',          country: 'ENGLAND',      venue: 'WEMBLEY STADIUM',      date: '25 JUL 2025', song: "Don't Look Back in Anger" },
+  { city: 'EDINBURGH',       country: 'SCOTLAND',     venue: 'MURRAYFIELD',          date: '8 AUG 2025',  song: 'Some Might Say' },
+  { city: 'DUBLIN',          country: 'IRELAND',      venue: 'CROKE PARK',           date: '16 AUG 2025', song: 'Wonderwall' },
+  { city: 'TORONTO',         country: 'CANADA',       venue: 'ROGERS STADIUM',       date: '24 AUG 2025', song: 'Morning Glory' },
+  { city: 'CHICAGO',         country: 'USA',          venue: 'SOLDIER FIELD',        date: '28 AUG 2025', song: 'Cigarettes & Alcohol' },
+  { city: 'EAST RUTHERFORD', country: 'USA',          venue: 'METLIFE STADIUM',      date: '31 AUG 2025', song: "Rock 'n' Roll Star" },
+  { city: 'PASADENA',        country: 'USA',          venue: 'ROSE BOWL',            date: '6 SEP 2025',  song: 'Champagne Supernova' },
+  { city: 'MEXICO CITY',     country: 'MEXICO',       venue: 'ESTADIO GNP SEGUROS',  date: '12 SEP 2025', song: 'Acquiesce' },
+  { city: 'GOYANG',          country: 'SOUTH KOREA',  venue: 'GOYANG STADIUM',       date: '21 OCT 2025', song: 'Hello' },
+  { city: 'TOKYO',           country: 'JAPAN',        venue: 'TOKYO DOME',           date: '25 OCT 2025', song: 'Whatever' },
+  { city: 'MELBOURNE',       country: 'AUSTRALIA',    venue: 'MARVEL STADIUM',       date: '31 OCT 2025', song: 'Roll with It' },
+  { city: 'SYDNEY',          country: 'AUSTRALIA',    venue: 'ACCOR STADIUM',        date: '7 NOV 2025',  song: 'Slide Away' },
+  { city: 'BUENOS AIRES',    country: 'ARGENTINA',    venue: 'MAS MONUMENTAL',       date: '15 NOV 2025', song: 'Stand by Me' },
+  { city: 'SANTIAGO',        country: 'CHILE',        venue: 'ESTADIO NACIONAL',     date: '19 NOV 2025', song: 'Cast No Shadow' },
+  { city: 'SAO PAULO',       country: 'BRAZIL',       venue: 'MORUMBIS',             date: '22 NOV 2025', song: 'The Masterplan' },
 ];
+
+// Stops take rooms in a boustrophedon so neighbours on the board are
+// neighbours in the tour.
+const ROOMS = [];
+for (let rr = 0; rr < ROOM_ROWS; rr++) {
+  for (let k = 0; k < ROOM_COLS; k++) {
+    ROOMS.push([rr % 2 ? ROOM_COLS - 1 - k : k, rr]);
+  }
+}
+
+TOUR.forEach((stop, i) => {
+  const [rc, rr] = ROOMS[i];
+  const p = roomCentre(rc, rr);
+  stop.x = p.x;
+  stop.y = p.y;
+  stop.room = [rc, rr];
+});
 
 // Map position -> file name in songs/. One track per stop.
 for (const stop of TOUR) {
@@ -443,15 +510,14 @@ let scene = 'menu';
 let flash = 0, t = 0;
 let player = 0;                    // 0 Noel, 1 Liam
 let selWho = 0;
-let hovered = -1;
 const played = new Set();
 
 let pos = { x: TOUR[0].x, y: TOUR[0].y };
 let atNode = 0;
-let moveTarget = null;
+let path = null;          // auto-walk waypoints from a click
 const held = new Set();
-const MAP_SPEED = 300;
-const NEAR = 42;
+const MAP_SPEED = 190;
+const NEAR = 40;
 
 // Progress: best score per stop, summed. Each stop needs a total to open.
 const SAVE_KEY = 'ogt.progress';
@@ -492,6 +558,61 @@ function nearestNode() {
     if (d < bd) { bd = d; best = i; }
   });
   return bd <= NEAR ? best : -1;
+}
+
+/* ------------------------------------------------------------ maze walk */
+
+const cellOf = (x, y) => [
+  Math.floor((x - MAZE_X) / TILE),
+  Math.floor((y - MAZE_Y) / TILE),
+];
+const cellCentre = (c, r) => ({
+  x: MAZE_X + c * TILE + TILE / 2,
+  y: MAZE_Y + r * TILE + TILE / 2,
+});
+
+function isWall(c, r) {
+  if (c < 0 || r < 0 || c >= MAZE_COLS || r >= MAZE_ROWS) return true;
+  return maze[r][c] === 1;
+}
+
+// Feet box, so the sprite can hug a wall without clipping into it.
+function blocked(x, y) {
+  const hw = 17, hh = 9;
+  return isWall(...cellOf(x - hw, y - hh)) || isWall(...cellOf(x + hw, y - hh))
+      || isWall(...cellOf(x - hw, y + hh)) || isWall(...cellOf(x + hw, y + hh));
+}
+
+function findPath(fromCell, toCell) {
+  const key = (c, r) => r * MAZE_COLS + c;
+  const start = key(...fromCell), goal = key(...toCell);
+  const prev = new Map();
+  const seen = new Set([start]);
+  const queue = [fromCell];
+
+  while (queue.length) {
+    const [c, r] = queue.shift();
+    if (key(c, r) === goal) break;
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr;
+      if (isWall(nc, nr)) continue;
+      const k = key(nc, nr);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      prev.set(k, key(c, r));
+      queue.push([nc, nr]);
+    }
+  }
+  if (!seen.has(goal)) return null;
+
+  const out = [];
+  let k = goal;
+  while (k !== start) {
+    out.push([k % MAZE_COLS, Math.floor(k / MAZE_COLS)]);
+    k = prev.get(k);
+    if (k === undefined) return null;
+  }
+  return out.reverse();
 }
 
 const menuChars = {
@@ -538,7 +659,7 @@ function setScene(s) {
   if (s === 'select') { selWho = 0; paintCards(); }
   if (s === 'map') {
     paintNodes();
-    moveTarget = null;
+    path = null;
     held.clear();
     if (soundOn) music.play().catch(() => {});
   }
@@ -777,29 +898,10 @@ function stadium(b) {
   }
 
   // pitch
-  ellipseFill(b, 480, 340, 404, 208, '#080808');
-  b.strokeStyle = 'rgba(255,255,255,.10)';
-  b.lineWidth = 2;
-  b.beginPath(); b.ellipse(480, 340, 330, 168, 0, 0, Math.PI * 2); b.stroke();
-  b.beginPath(); b.moveTo(480, 150); b.lineTo(480, 530); b.stroke();
-  b.beginPath(); b.ellipse(480, 340, 54, 30, 0, 0, Math.PI * 2); b.stroke();
-  b.fillStyle = 'rgba(255,255,255,.16)';
-  b.beginPath(); b.ellipse(480, 340, 5, 3, 0, 0, Math.PI * 2); b.fill();
-
-  // stage at the near end
-  b.fillStyle = '#191919';
-  b.fillRect(352, 58, 256, 46);
-  b.fillStyle = '#262626';
-  b.fillRect(352, 58, 256, 3);
-  b.fillStyle = '#0a0a0a';
-  b.fillRect(360, 66, 240, 34);
-  for (let i = 0; i < 8; i++) {
-    b.fillStyle = i % 2 ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.05)';
-    b.fillRect(368 + i * 30, 72, 18, 3);
-  }
+  ellipseFill(b, 480, 340, 420, 230, '#080808');
 
   // floodlight towers: hardware only, the beams are drawn live so they can
-  // follow the player around the pitch
+  // follow the player around the maze
   for (const [tx, ty] of LIGHTS) {
     b.fillStyle = '#2a2a2a';
     b.fillRect(tx - 5, ty - 5, 10, 10);
@@ -807,16 +909,59 @@ function stadium(b) {
     b.fillRect(tx - 2, ty - 2, 4, 4);
   }
 
-  // pitch matrix
-  b.strokeStyle = 'rgba(255,255,255,.07)';
-  b.lineWidth = 1;
-  for (let c = 0; c <= GRID.cols; c++) {
-    const x = GRID.x0 + c * GRID.cw;
-    b.beginPath(); b.moveTo(x + .5, GRID.y0); b.lineTo(x + .5, GRID.y0 + GRID.rows * GRID.ch); b.stroke();
+  drawMaze(b);
+}
+
+/* ------------------------------------------------------------- maze bricks */
+
+function drawBrick(b, x, y) {
+  b.fillStyle = '#141414';
+  b.fillRect(x, y, TILE, TILE);
+
+  const bw = 32, bh = 16;
+  for (let row = 0; row < 4; row++) {
+    const off = (row % 2) ? -16 : 0;
+    for (let bx = off; bx < TILE; bx += bw) {
+      const px = Math.max(x + bx, x);
+      const pw = Math.min(x + bx + bw - 2, x + TILE) - px;
+      if (pw <= 0) continue;
+      const py = y + row * bh;
+      b.fillStyle = '#464646';
+      b.fillRect(px, py, pw, bh - 2);
+      b.fillStyle = '#7d7d7d';
+      b.fillRect(px, py, pw, 3);
+      b.fillStyle = '#2b2b2b';
+      b.fillRect(px, py + bh - 5, pw, 3);
+    }
   }
-  for (let r = 0; r <= GRID.rows; r++) {
-    const y = GRID.y0 + r * GRID.ch;
-    b.beginPath(); b.moveTo(GRID.x0, y + .5); b.lineTo(GRID.x0 + GRID.cols * GRID.cw, y + .5); b.stroke();
+
+  b.fillStyle = 'rgba(255,255,255,.14)';
+  b.fillRect(x, y, TILE, 2);
+  b.fillRect(x, y, 2, TILE);
+  b.fillStyle = 'rgba(0,0,0,.6)';
+  b.fillRect(x, y + TILE - 3, TILE, 3);
+  b.fillRect(x + TILE - 3, y, 3, TILE);
+}
+
+function drawMaze(b) {
+  // floor
+  for (let r = 0; r < MAZE_ROWS; r++) {
+    for (let c = 0; c < MAZE_COLS; c++) {
+      if (maze[r][c]) continue;
+      const x = MAZE_X + c * TILE, y = MAZE_Y + r * TILE;
+      b.fillStyle = ((c + r) & 1) ? '#0b0b0b' : '#0e0e0e';
+      b.fillRect(x, y, TILE, TILE);
+      b.fillStyle = 'rgba(255,255,255,.030)';
+      b.fillRect(x, y, TILE, 1);
+      b.fillRect(x, y, 1, TILE);
+    }
+  }
+
+  // walls
+  for (let r = 0; r < MAZE_ROWS; r++) {
+    for (let c = 0; c < MAZE_COLS; c++) {
+      if (maze[r][c]) drawBrick(b, MAZE_X + c * TILE, MAZE_Y + r * TILE);
+    }
   }
 }
 
@@ -853,43 +998,63 @@ function renderPortraits() {
 
 /* -------------------------------------------------------------------- map */
 
-const nodesBox = el('nodes');
+/* -------------------------------------------------------------------- map */
 
 function paintNodes() {
-  nodesBox.innerHTML = '';
-  TOUR.forEach((stop, i) => {
-    const locked = !isUnlocked(i);
-    const b = document.createElement('button');
-    b.className = 'node' + (played.has(i) ? ' played' : '') + (locked ? ' locked' : '');
-    b.style.left = stop.x + 'px';
-    b.style.top = (stop.y + 12) + 'px';
-
-    const fc = document.createElement('canvas');
-    fc.width = FLAG_W; fc.height = FLAG_H;
-    fc.className = 'flag';
-    const fx = fc.getContext('2d');
-    fx.imageSmoothingEnabled = false;
-    fx.drawImage(flagCanvas(stop.country), 0, 0);
-
-    b.innerHTML =
-      `<span class="lbl">${stop.city}</span>` +
-      `<span class="song">${stop.song}</span>`;
-    b.appendChild(fc);
-    b.insertAdjacentHTML('beforeend',
-      `<span class="unlock">${locked ? 'LOCKED ' + unlockFor(i).toLocaleString() : 'OPEN'}</span>`);
-
-    b.addEventListener('click', () => goTo(i));
-    b.addEventListener('pointerenter', () => hovered = i);
-    b.addEventListener('pointerleave', () => { if (hovered === i) hovered = -1; });
-    nodesBox.appendChild(b);
-  });
   el('map-who').textContent = player === 0 ? 'NOEL' : 'LIAM';
   updateTotals();
+  updateStopBar();
 }
 
 function goTo(i) {
   if (i === atNode) { askEnter(i); return; }
-  moveTarget = { x: TOUR[i].x, y: TOUR[i].y, to: i };
+  const [c, r] = cellOf(pos.x, pos.y);
+  const [rc, rr] = TOUR[i].room;
+  const route = findPath([c, r], [1 + rc * 2, 1 + rr * 2]);
+  if (!route) return;
+  path = route.map(([cc, rr2]) => cellCentre(cc, rr2));
+  path.to = i;
+}
+
+/* ---------------------------------------------------------------- stop bar */
+
+let barNode = -2;
+
+function updateStopBar() {
+  const near = atNode;
+  if (near === barNode) return;
+  barNode = near;
+
+  const bar = el('stop-bar');
+  const flag = el('sb-flag');
+  const city = el('sb-city');
+  const song = el('sb-song');
+  const state = el('sb-state');
+  const hint = el('sb-hint');
+
+  if (near < 0) {
+    bar.classList.remove('active');
+    city.textContent = 'THE MAZE';
+    song.textContent = 'Follow the corridors to a door';
+    state.textContent = '';
+    hint.textContent = 'ARROWS TO WALK';
+    return;
+  }
+
+  const stop = TOUR[near];
+  const locked = !isUnlocked(near);
+  bar.classList.add('active');
+  bar.classList.toggle('locked', locked);
+
+  const fc = flag.getContext('2d');
+  fc.imageSmoothingEnabled = false;
+  fc.clearRect(0, 0, FLAG_W, FLAG_H);
+  fc.drawImage(flagCanvas(stop.country), 0, 0);
+
+  city.textContent = stop.city;
+  song.textContent = stop.song;
+  state.textContent = locked ? 'LOCKED ' + unlockFor(near).toLocaleString() : 'OPEN';
+  hint.textContent = locked ? 'KEEP PLAYING TO UNLOCK' : 'ENTER TO GO INSIDE';
 }
 
 // Four lamps sweeping the pitch, each aimed at the player.
@@ -925,19 +1090,40 @@ function renderMap() {
   ctx.drawImage(bg('map'), 0, 0);
   drawFollowLights();
 
+  // stop pads: a little platform in each room, plus its flag and name
   TOUR.forEach((stop, i) => {
-    const on = i === atNode || i === hovered;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(stop.x - 5, stop.y - 5, 11, 11);
-    ctx.fillStyle = on ? '#ffffff' : (played.has(i) ? '#8a8a8a' : '#000000');
-    ctx.fillRect(stop.x - 3, stop.y - 3, 7, 7);
+    const locked = !isUnlocked(i);
+    const near = i === atNode;
+    const done = played.has(i);
 
-    if (i === atNode) {
+    const padW = 38, padH = 10;
+    ctx.fillStyle = locked ? '#3c3c3c' : (near ? '#ffffff' : (done ? '#9a9a9a' : '#cfcfcf'));
+    ctx.fillRect(Math.round(stop.x - padW / 2), Math.round(stop.y + 10), padW, padH);
+    if (near) {
       const pulse = 0.5 + 0.5 * Math.sin(t * 6);
-      ctx.strokeStyle = `rgba(255,255,255,${0.35 + pulse * 0.5})`;
+      ctx.strokeStyle = `rgba(255,255,255,${0.3 + pulse * 0.5})`;
       ctx.lineWidth = 2;
-      ctx.strokeRect(stop.x - 9, stop.y - 9, 19, 19);
+      ctx.strokeRect(stop.x - padW / 2 - 4, stop.y + 6, padW + 8, padH + 8);
     }
+
+    // label chip: flag + city, readable over the bricks
+    const label = stop.city;
+    ctx.font = '7px ui-monospace, Consolas, monospace';
+    const tw = ctx.measureText(label).width;
+    const rowW = 18 + 4 + tw;
+    const lx = Math.round(stop.x - rowW / 2);
+    const ly = Math.round(stop.y + 24);
+
+    ctx.fillStyle = 'rgba(0,0,0,.72)';
+    ctx.fillRect(lx - 3, ly - 1, rowW + 6, 13);
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = locked ? 0.45 : 1;
+    ctx.drawImage(flagCanvas(stop.country), lx, ly + 1, 18, 11);
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = locked ? '#6a6a6a' : (near ? '#ffffff' : '#b4b4b4');
+    ctx.fillText(label, lx + 22, ly + 9);
   });
 
   const S = 1;
@@ -1317,7 +1503,7 @@ let promptLocked = false;
 
 function askEnter(i) {
   held.clear();
-  moveTarget = null;
+  path = null;
   promptNode = i;
   promptLocked = !isUnlocked(i);
   const stop = TOUR[i];
@@ -1466,7 +1652,7 @@ addEventListener('keydown', e => {
   if (scene === 'map') {
     if (k === 'arrowleft' || k === 'arrowright' || k === 'arrowup' || k === 'arrowdown') {
       held.add(k);
-      moveTarget = null;
+      path = null;
       e.preventDefault();
       return;
     }
@@ -1523,28 +1709,32 @@ function update(dt) {
     if (held.has('arrowup')) vy -= 1;
     if (held.has('arrowdown')) vy += 1;
 
-    if (moveTarget) {
-      const dx = moveTarget.x - pos.x, dy = moveTarget.y - pos.y;
+    if (vx || vy) path = null;
+
+    if (path && path.length) {
+      const wp = path[0];
+      const dx = wp.x - pos.x, dy = wp.y - pos.y;
       const d = Math.hypot(dx, dy);
       const step = MAP_SPEED * dt;
       if (d <= step) {
-        pos.x = moveTarget.x; pos.y = moveTarget.y;
-        const to = moveTarget.to;
-        moveTarget = null;
-        askEnter(to);
+        pos.x = wp.x; pos.y = wp.y;
+        path.shift();
       } else {
         pos.x += dx / d * step;
         pos.y += dy / d * step;
       }
     } else if (vx || vy) {
       const len = Math.hypot(vx, vy);
-      pos.x += (vx / len) * MAP_SPEED * dt;
-      pos.y += (vy / len) * MAP_SPEED * dt;
+      const step = MAP_SPEED * dt;
+      const nx = pos.x + (vx / len) * step;
+      if (!blocked(nx, pos.y)) pos.x = nx;
+      const ny = pos.y + (vy / len) * step;
+      if (!blocked(pos.x, ny)) pos.y = ny;
     }
 
-    pos.x = Math.max(GRID.x0 + 24, Math.min(GRID.x0 + GRID.cols * GRID.cw - 24, pos.x));
-    pos.y = Math.max(GRID.y0 + 20, Math.min(GRID.y0 + GRID.rows * GRID.ch - 14, pos.y));
+    const prev = atNode;
     atNode = nearestNode();
+    if (atNode !== prev) updateStopBar();
   }
 
   if (scene === 'guitar') ghUpdate(dt);
@@ -1579,3 +1769,6 @@ paintSound();
 paintNodes();
 updateTotals();
 requestAnimationFrame(loop);
+
+
+

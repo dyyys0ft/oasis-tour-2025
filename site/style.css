@@ -1,4 +1,4 @@
-/* OasisGuitarTour — Live '25 monochrome */
+﻿/* OasisGuitarTour â€” Live '25 monochrome */
 
 :root {
   --ink: #000;
@@ -198,50 +198,30 @@ body:not([data-scene="menu"]) .menu-ui { opacity: 0; pointer-events: none; }
   font-size: 7px; letter-spacing: 4px; text-indent: 4px; color: var(--dimmer);
 }
 
-#nodes { position: absolute; inset: 0; }
-
-.node {
-  position: absolute;
-  transform: translateX(-50%);
-  width: 128px;
-  padding: 4px 0 0;
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  background: none; border: 0; border-radius: 0;
-  cursor: pointer;
-  text-align: center;
+#stop-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 56px;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 24px;
+  background: rgba(0, 0, 0, .8);
+  border-top: 2px solid #2a2a2a;
 }
-.node .lbl {
-  font-size: 9px; letter-spacing: 1.5px; color: var(--dim);
-  white-space: nowrap; transition: color .1s;
-}
-.node .song {
-  font-size: 8px; letter-spacing: .5px; color: #6a6a84; line-height: 1.25;
-  max-width: 118px;
-}
-.node .flag {
-  width: 32px; height: 20px; display: block; margin: 2px 0 1px;
+#stop-bar canvas {
+  width: 32px; height: 20px;
   image-rendering: pixelated;
-  border: 1px solid rgba(255, 255, 255, .32);
+  border: 1px solid rgba(255, 255, 255, .35);
 }
-.node .unlock {
-  font-size: 7px; letter-spacing: 1px; color: #5f5f7a;
+.sb-main { display: flex; flex-direction: column; gap: 3px; }
+.sb-main b { font-size: 12px; letter-spacing: 3px; color: #fff; }
+.sb-main span { font-size: 9px; letter-spacing: 1px; color: #8a8a8a; }
+.sb-state {
+  margin-left: auto;
+  font-size: 9px; letter-spacing: 2px; color: #cfcfcf;
 }
-
-.node:hover .lbl { color: #fff; }
-.node:focus-visible { outline: 2px solid var(--line-lit); }
-
-.node.locked .lbl { color: #565670; }
-.node.locked .song { color: #3f3f52; }
-.node.locked .flag { opacity: .4; }
-.node.locked .unlock { color: #6b5a1e; }
-
-.node.played .lbl { color: #fff; }
-
-.map-hint {
-  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
-  margin: 0; font-size: 9px; letter-spacing: 3px; color: var(--dimmer);
+.sb-hint {
+  min-width: 190px; text-align: right;
+  font-size: 9px; letter-spacing: 2px; color: #6d6d8a;
 }
-
+#stop-bar.locked .sb-state { color: #b08a12; }
 /* ------------------------------------------------------------------ venue */
 
 #venue { display: block; }
@@ -475,3 +455,4 @@ body:not([data-scene="menu"]) .menu-ui { opacity: 0; pointer-events: none; }
     ),
     radial-gradient(125% 95% at 50% 45%, transparent 58%, rgba(0, 0, 0, .6) 100%);
 }
+

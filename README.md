@@ -23,11 +23,11 @@ MENU  ->  PLAY  ->  CHOOSE PLAYER  ->  STADIUM MAP  ->  "GO INSIDE?"  ->  VENUE 
 ```
 
 - **Choose player** - Noel or Liam, arrows + Enter or click.
-- **Stadium map** - a 6 x 3 matrix of pitches, one cell per stop. Each cell
-  shows the city, its song, the country flag and what it costs to open. The
-  arrow keys walk your character freely around the board; **Enter** opens the
-  stop you are standing on (within a cell of it). Clicking a city still walks
-  there.
+- **Tour maze** - a brick-walled maze of 18 rooms, one per stop (plus a spare).
+  Each room has a lit pad showing its country flag and city name. Arrow keys
+  walk your character with real wall collision; step onto a pad and the bar at
+  the bottom shows the song, its unlock cost and **Enter to go inside**.
+  Clicking a pad pathfinds there through the corridors.
 - **Venue** - themed for the country: a 16-bit flag banner, bunting in the flag
   colours, the stage tinted to match, and the character wearing or holding a
   local prop (sombrero in Mexico, football in Brazil, pint in Ireland...).
