@@ -1,0 +1,17 @@
+# Audio is not tracked: these are copyrighted recordings. Drop your own files
+# into songs/ (see songs/README.md) and assets/theme.mp3 for the menu loop.
+songs/*.mp3
+assets/*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc

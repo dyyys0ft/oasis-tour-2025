@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OasisGuitarTour</title>
+<link rel="stylesheet" href="site/style.css?v=38174745">
+</head>
+<body data-scene="menu">
+
+<div id="viewport">
+  <div id="game">
+    <canvas id="stage" width="960" height="600"></canvas>
+
+    <!-- menu -->
+    <img id="logo" class="menu-ui" alt="OasisGuitarTour" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGcAAABBCAYAAADMtLrSAAAFY0lEQVR4nO1cS27bMBDlCD6Ds8oiboAcwJugi6LncNZOewgjiyKHaON1fAqviyzqGzTxOrkECwqWQFP8zJBDii78AAGWNBw+UeJoSD5ZiDOqBTD4kIz11ORLIuuh+i3mREoZvgYAwNRVky+JKR/hl4RGFMB0Ok19Eqv3lcNv7M2R1Mrn83lX7lR8JYHDb0zXO+ryqgsfnhQn3t/fj+y1ek/C18XFhaDi8vJS3NzciM1mo/slYSISoRrg4+Oje1Kw9tJGuFZfXWOXRvLNUVANsNvtxGKxoNjLU/KloHrCKUBOp9N+m8/ncrFYdPF+sOkw7X3nBNHXmLw8W/GeAyoEOEKGGRbkfv/qdOQ7J4i+RuSVBSmpNKiQobq6o7snPzkV82LtIbneObDZbHRi0ZkTM4CT18vL7/738/OzvUIAZzIxZkIAobBAzZyYADl4ucJdKNurYYbA2cW7zMkTbnJCluDFPaBlSaWxIUOltIdBWUnICF4wm12rLA1dSRf6rq4+sYU4zptDCRn9O4CzfkZeoczPWxdXiOO4Oc4Gpg4CmSETebXlY/lrA1oY6+ZEhQx9Z7vdkirc4uxTeQ3Kh/D165fBsUMd0Tcouees179iQkZ2rBN52cp7riFLeG4KZj8xgzVJHOhl46VlYkUGoCxLBvoT1mG5/HZ0XO17Vgn7rOjx8Ye1jA4zROlT87l5uTiFeBUNa7YL9523hAg9DluzorWjDl+Iys3L5z/HQLvIMjVisNbOh1HK7zIMaGvjFfuSJg3QTHi6PMrv5XH5DlAxr2qWDFIQ4xdOgJconUqrLq8WoFI5cPuFSnnRK2QQ5HGlkoPFMPF/I9izogV1BOFcjf5kRtEg2/U2tQjyavfH7Rvjo8koyKvdXxIsvtn55RDknYI/Z3qsl/OJCc20OQM/e7bGLcir1B9g0uMYMSHX9TpT6QRBHpyQP8CkxzGjfc7rZRf3je1P+AWGg+tPqEfk4jfJJO4b218Lwqi+f/fGiglz8Btl4jPDeoh0+AwJDEshih+rwCNFlBd68maaGoYo8nMJDDmRhV+Rm6MjFL48AFsYQIr8SiyRs/MbK6zFAqjrK4Xn6Fj5Fek5t7efgzZ6KAgAMIK/HCK/0vyKhTXmL8MAm4lxivxK8yv6zknMmKT2G6jrKxwiv9L8JrnEfa7zLq20TZTnmVtzZTrJIj9qO+TkVzxbi11YW7uVMtY1KVEYOfg1Iw0akzFPF/nFlEP75xAhdj0H7u+/W8V9nkFUya/VwMZvufzjLuDn51yt1HuAqx0s2RU3P2GGNTZxXyYAp8gvJED02WOXIFJFiGZYq0Lc5wHUws8xgGTl5xQpMIjoJFE7TLGX3PyoKMDPma1xiOioPij2MAK/4iLESWYRHdUHxR5G4FfUdygHb/XHEX5kpBgxJFQEy7EYftTyGN9mgtDtR/MbNKrlc7uBCkY7bu4PfDh8YWzQfBL+JZCVB7VdQlz1sNY77LriYX8w3aFNM5j77YhYlVHH1Njg7u4u1kZi+XTlfTYOsPIItEsS11acYIoSDNHBwMbYD/nD1CkIdUkCH+q1c/Mgc21sq3Zvb3/7zUwVzZU9wj8vAdVmv39tR9sdF1tdpg3my+cYHr59ig2Fq3VubTa7FqvVQ/v70JVHm09brR76LWRjfMJeau2GBArXxjVdrgrZps/NY44pdomdfvfZbA/nFJcQH3VePVSBpYckHj5big2Wa2NM3rUFnp5+tpvaN4Cxkd05hc62ZO9b8PZ2rnZh4dq+pLrN9SIP2Bydx/hCnpMWW4wN+ro95djaJZUrZu0hZENZx6Cck5E2GMhC7UKp84wzzjjjjDNEbvwDNzJjSKy2I3oAAAAASUVORK5CYII=">
+    <div id="menu-score" class="menu-ui">
+      <b id="home-total">0</b>
+      <small>TOUR SCORE</small>
+    </div>
+    <button id="play" class="menu-ui">PLAY</button>
+    <div id="credit" class="menu-ui">OASIS LIVE '25 &middot; 16-BIT</div>
+
+    <!-- player select -->
+    <section id="select" class="screen">
+      <h2>CHOOSE YOUR PLAYER</h2>
+      <div class="cards">
+        <button class="card" data-who="0">
+          <canvas class="portrait" width="192" height="192"></canvas>
+          <img class="plate" alt="Noel" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAAVCAYAAADmSqZGAAABlUlEQVR4nO1Xy23DMAyVCi8SN4AHsFcJCvjepCsVOdtAkRU8gj1CkVFUKDYFmhVFKVaDoui7JBEfn/jRL0r9QWj03XjGVITdRGiHeJyfFI8sYMysobX2BsTY3fg34Uge46eEeIJ4ogN1XdsPNgJkD0Yp6Qh+m3Q0V0mu0k3TqKqqVNd1jkcDsRjH0Vt56y8B68N8fd/jeIIoOIMNdJomIwktPNW2bdBOg/5JFHQAKokqLbbeJrRU0gEqDXYKyqfA/ncndb1+rioJv6HS2E75CG65RvJ9vl7/FLDLryz3t4Qulw+12z3HBBUFq+frxLIiko/vpKQsYC/kSgiDasbu4c1J2QnKcm+gYzlwOLxIezP5GkhNykIvFcyGh51+wzAEidS+lR84/ezyM5L+1k6lIGtHI/V1tqSOx7fb5j6dXrnTzPvS4PjIz9zB19k6NZ+O86Tn83vSS4PyqV8i3+DEVhceVJZ5a3F2N06BeC6AGIBfKl8t8Rb0lOMqG7BLfm6yCN4KoU6H4LvofuufRQlZXiP/UA/EFz4D6zyA3LG9AAAAAElFTkSuQmCC">
+          <span class="role">LEAD GUITAR &middot; THE CHIEF</span>
+          <span class="pick">&gt; PICK NOEL &lt;</span>
+        </button>
+        <button class="card" data-who="1">
+          <canvas class="portrait" width="192" height="192"></canvas>
+          <img class="plate" alt="Liam" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAAVCAYAAADmSqZGAAABnElEQVR4nO1XUWrDMAy1x05SBj6A8z16iTLI/+g9Si8x+h3D6BV6hPgIo0fRcBob15Fkxwm0jD0ojSU9WYrsWBbiD0JGz4DIOEDFHByPsqPiIfVeAAA3GyllSWLBPofEH8mj7Ih4gNO/pM611gNJrITIH+uTmheRQ443eTNN0willDDGxHoMMDoc0Pd94Kdw/rquu00opQ/kDp4/vnkX0J1eEnIs3ldRD2mthbZt0SQouISstQLjxfpSOQfw0Fq7QLPLJeYyfKjVx2OtdRiPK4SNN1Tqev0RlXAlB4IflnfOf6qPx0qpMPYV4/wtWX5VOJ+/h3+/xzxySW82b2EvUkv3YUktWRmW2YsPTWq3+2ArmIE0xgx753g8PFeluK9j6R4WDEJSl8tlyURZfqofz5WA7fZ9kb85lQLui5bhehvuAJ/jqxiTNmm//xzemjsSsF90rqRylL92wCUgK3U6faFyf05Q+pRf0wmsevXQSE+GwfdatfZEbxnmr7UXSO9H9nJLz41C+8n8c+095AqXv1r70stf9WXxH+LJ8QvjJ1LOxJNRbQAAAABJRU5ErkJggg==">
+          <span class="role">VOCALS &middot; OUR KID</span>
+          <span class="pick">&gt; PICK LIAM &lt;</span>
+        </button>
+      </div>
+      <p class="hint">ARROWS TO PICK &middot; ENTER TO CONFIRM</p>
+    </section>
+
+    <!-- tour roadmap -->
+    <section id="map" class="screen">
+      <header class="map-head">
+        <span class="kicker">OASIS LIVE '25 &middot; 17 STOPS</span>
+        <div class="map-score">
+          <b id="map-total">0</b>
+          <small>TOUR SCORE</small>
+        </div>
+        <span class="who" id="map-who">NOEL</span>
+      </header>
+      <div id="nodes"></div>
+      <p class="map-hint">ARROWS TO WALK &middot; ENTER TO GO INSIDE</p>
+    </section>
+
+    <!-- venue -->
+    <section id="venue" class="screen">
+      <div class="venue-card">
+        <div class="kicker" id="v-stop"></div>
+        <div class="v-country" id="v-country"></div>
+        <h2 id="v-city"></h2>
+        <div class="venue-line" id="v-venue"></div>
+        <div class="venue-date" id="v-date"></div>
+        <div class="setlist">
+          <div class="sl-head">TONIGHT'S SONG</div>
+          <div class="sl-song" id="v-song"></div>
+          <div class="sl-body">
+            TRACK &middot; <span id="v-file"></span>
+          </div>
+        </div>
+        <div class="diff-row">
+          <span>DIFFICULTY</span>
+          <button class="diff" data-diff="easy">EASY</button>
+          <button class="diff" data-diff="medium">MEDIUM</button>
+          <button class="diff" data-diff="hard">HARD</button>
+        </div>
+        <button id="v-play">&#9654; PLAY TRACK</button>
+        <div class="v-status" id="v-status">CHECKING TRACK&hellip;</div>
+        <button id="v-back">&#9664; BACK TO MAP</button>
+      </div>
+    </section>
+
+    <!-- guitar engine -->
+    <section id="guitar" class="screen">
+      <div class="gh-top">
+        <div class="gh-block"><span id="g-score">0</span><small>SCORE</small></div>
+        <div class="gh-mid"><span id="g-song"></span><small id="g-city"></small></div>
+        <div class="gh-block right"><span id="g-combo">0</span><small>COMBO</small></div>
+      </div>
+      <div class="gh-progress"><i id="g-prog"></i></div>
+      <button id="g-quit">QUIT</button>
+
+      <div id="gh-results">
+        <div class="gh-panel">
+          <div class="kicker" id="r-city"></div>
+          <h2>SET COMPLETE</h2>
+          <div class="gh-stats">
+            <div><b id="r-score">0</b><small>SCORE</small></div>
+            <div><b id="r-acc">0%</b><small>ACCURACY</small></div>
+            <div><b id="r-combo">0</b><small>MAX COMBO</small></div>
+          </div>
+          <div class="gh-btns">
+            <button id="r-again">PLAY AGAIN</button>
+            <button id="r-back" class="ghost">BACK TO MAP</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- go inside? -->
+    <div id="prompt">
+      <div class="panel">
+        <div class="kicker" id="p-stop"></div>
+        <h3 id="p-city"></h3>
+        <div class="venue-line" id="p-venue"></div>
+        <div class="venue-date" id="p-date"></div>
+        <div class="venue-song" id="p-song"></div>
+        <div class="q" id="p-q">GO INSIDE?</div>
+        <div class="btns">
+          <button id="p-yes">YES</button>
+          <button id="p-no" class="ghost">NO</button>
+        </div>
+      </div>
+    </div>
+
+    <button id="sound">SOUND OFF</button>
+    <canvas id="actors" width="960" height="600"></canvas>
+  </div>
+</div>
+
+<div id="crt"></div>
+
+<script src="site/assets.js?v=38174745"></script>
+<script src="site/charts.js"></script>
+<script src="site/app.js?v=38174745"></script>
+</body>
+</html>

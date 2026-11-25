@@ -1,0 +1,72 @@
+{
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "animations": {
+    "noel_idle": {
+      "image": "atlas_idle.png",
+      "row": 0,
+      "frames": [
+        0,
+        1
+      ],
+      "fps": 4
+    },
+    "liam_idle": {
+      "image": "atlas_idle.png",
+      "row": 0,
+      "frames": [
+        2,
+        3
+      ],
+      "fps": 4
+    },
+    "noel_walk": {
+      "image": "atlas_walk.png",
+      "row": 0,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "fps": 8
+    },
+    "liam_walk": {
+      "image": "atlas_walk.png",
+      "row": 1,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "fps": 8
+    },
+    "noel_strum": {
+      "image": "atlas_action.png",
+      "row": 0,
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 10
+    },
+    "liam_shake": {
+      "image": "atlas_action.png",
+      "row": 1,
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 10
+    }
+  }
+}
